@@ -1,0 +1,79 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual envs
+.venv/
+venv/
+ENV/
+.envrc
+.python-version
+
+# Build artifacts
+build/
+dist/
+.eggs/
+*.egg-info/
+.wheels/
+
+# Logs & temp
+logs/
+*.log
+/tmp/
+*.tmp
+*.temp
+.cache/
+*.cache
+
+# Databases & storage
+*.sqlite3
+*.db
+voice_ai.db
+
+# --- Node/React ---
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+
+# Lock files (optional keep if desired)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# --- Environment files ---
+.env
+.env.*
+!*.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.local.example
+
+# --- Editors/OS ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Containers ---
+.docker/
+.dockerignore
+
+# --- Misc ---
+coverage/
+pytest_cache/
+**/__pycache__/
+
+# --- Tests & Dev-only scripts ---
+# Ignore all test files and folders
+/tests/
+**/tests/
+**/test_*.py
+# Dev-only helper scripts
+check_server.py
+verify_server.py
+simple_test.py
+cli_interface.py

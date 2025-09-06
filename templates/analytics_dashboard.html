@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Bot - Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-trend {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .trend-positive {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .trend-negative {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .trend-neutral {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1d1d1f;
+        }
+        
+        .tables-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .table-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .table td {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        .refresh-info {
+            text-align: center;
+            margin-top: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .filters select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+        }
+        
+        .filters button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .filters button:hover {
+            background: #5a6fd8;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .tables-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Voice AI Bot Analytics</h1>
+        <p>Real-time insights into your AI voice assistant usage</p>
+    </div>
+    
+    <div class="container">
+        <div class="filters">
+            <label for="timeRange">Time Range:</label>
+            <select id="timeRange">
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="90">Last 90 days</option>
+            </select>
+            <button onclick="refreshData()">Refresh</button>
+            <span style="margin-left: auto; font-size: 0.9rem; color: #666;">
+                Last updated: <span id="lastUpdate">Loading...</span>
+            </span>
+        </div>
+        
+        <div id="loading" class="loading">
+            <p>Loading analytics data...</p>
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <p>Error loading analytics data. Please check your admin authentication.</p>
+        </div>
+        
+        <div id="dashboard" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalSessions">0</div>
+                    <div class="stat-label">Total Sessions</div>
+                    <div class="stat-trend" id="sessionTrend">0%</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" id="totalMessages">0</div>
+                    <div class="stat-label">Messages Processed</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" id="totalAudio">0</div>
+                    <div class="stat-label">Audio Minutes</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" id="avgDuration">0s</div>
+                    <div class="stat-label">Avg Session Duration</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" id="errorRate">0%</div>
+                    <div class="stat-label">Error Rate</div>
+                </div>
+            </div>
+            
+            <div class="charts-section">
+                <div class="chart-container">
+                    <div class="chart-title">Daily Sessions</div>
+                    <canvas id="sessionsChart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-title">Feature Usage</div>
+                    <canvas id="featuresChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="tables-section">
+                <div class="table-container">
+                    <div class="chart-title">Top API Endpoints</div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Endpoint</th>
+                                <th>Calls</th>
+                            </tr>
+                        </thead>
+                        <tbody id="endpointsTable">
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="table-container">
+                    <div class="chart-title">Active Sessions</div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Session ID</th>
+                                <th>Messages</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activeSessionsTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="refresh-info">
+            <p>Dashboard auto-refreshes every 30 seconds. Data may take a few moments to update.</p>
+        </div>
+    </div>
+    
+    <script>
+        let sessionsChart = null;
+        let featuresChart = null;
+        
+        // Configuration
+        const ADMIN_KEY = 'your-admin-key-here'; // Replace with actual admin key
+        const API_BASE = '/api/v1/analytics';
+        
+        async function fetchAnalytics(days = 30) {
+            try {
+                const response = await fetch(`${API_BASE}/dashboard?days=${days}`, {
+                    headers: {
+                        'x-admin-key': ADMIN_KEY
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                return data.data;
+            } catch (error) {
+                console.error('Error fetching analytics:', error);
+                throw error;
+            }
+        }
+        
+        async function fetchActiveSessions() {
+            try {
+                const response = await fetch(`${API_BASE}/active-sessions`, {
+                    headers: {
+                        'x-admin-key': ADMIN_KEY
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                return data.active_sessions || [];
+            } catch (error) {
+                console.error('Error fetching active sessions:', error);
+                return [];
+            }
+        }
+        
+        function updateStats(data) {
+            document.getElementById('totalSessions').textContent = data.summary.total_sessions.toLocaleString();
+            document.getElementById('totalUsers').textContent = data.summary.total_users.toLocaleString();
+            document.getElementById('totalMessages').textContent = data.summary.total_messages.toLocaleString();
+            document.getElementById('totalAudio').textContent = data.summary.total_audio_minutes.toFixed(1);
+            document.getElementById('avgDuration').textContent = Math.round(data.summary.avg_session_duration) + 's';
+            document.getElementById('errorRate').textContent = data.summary.error_rate.toFixed(1) + '%';
+            
+            // Update trend
+            const trendElement = document.getElementById('sessionTrend');
+            const trend = data.summary.session_trend_percent;
+            trendElement.textContent = (trend >= 0 ? '+' : '') + trend.toFixed(1) + '%';
+            
+            if (trend > 0) {
+                trendElement.className = 'stat-trend trend-positive';
+            } else if (trend < 0) {
+                trendElement.className = 'stat-trend trend-negative';
+            } else {
+                trendElement.className = 'stat-trend trend-neutral';
+            }
+        }
+        
+        function updateSessionsChart(data) {
+            const ctx = document.getElementById('sessionsChart').getContext('2d');
+            
+            if (sessionsChart) {
+                sessionsChart.destroy();
+            }
+            
+            const labels = data.daily_stats.map(d => new Date(d.date).toLocaleDateString());
+            const sessions = data.daily_stats.map(d => d.sessions);
+            const users = data.daily_stats.map(d => d.users);
+            
+            sessionsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Sessions',
+                        data: sessions,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Users',
+                        data: users,
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateFeaturesChart(data) {
+            const ctx = document.getElementById('featuresChart').getContext('2d');
+            
+            if (featuresChart) {
+                featuresChart.destroy();
+            }
+            
+            const labels = data.top_features.map(f => f.name);
+            const counts = data.top_features.map(f => f.count);
+            
+            featuresChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#f5576c',
+                            '#4facfe',
+                            '#00f2fe'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateEndpointsTable(data) {
+            const tbody = document.getElementById('endpointsTable');
+            tbody.innerHTML = '';
+            
+            data.top_endpoints.slice(0, 10).forEach(endpoint => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = endpoint.name;
+                row.insertCell(1).textContent = endpoint.calls.toLocaleString();
+            });
+        }
+        
+        async function updateActiveSessionsTable() {
+            const tbody = document.getElementById('activeSessionsTable');
+            tbody.innerHTML = '';
+            
+            try {
+                const activeSessions = await fetchActiveSessions();
+                
+                if (activeSessions.length === 0) {
+                    const row = tbody.insertRow();
+                    const cell = row.insertCell(0);
+                    cell.colSpan = 3;
+                    cell.textContent = 'No active sessions';
+                    cell.style.textAlign = 'center';
+                    cell.style.fontStyle = 'italic';
+                    cell.style.color = '#666';
+                } else {
+                    activeSessions.slice(0, 10).forEach(session => {
+                        const row = tbody.insertRow();
+                        row.insertCell(0).textContent = session.session_id.substring(0, 8) + '...';
+                        row.insertCell(1).textContent = session.message_count;
+                        
+                        const startTime = new Date(session.start_time);
+                        const duration = Math.round((Date.now() - startTime.getTime()) / 1000);
+                        row.insertCell(2).textContent = duration + 's';
+                    });
+                }
+            } catch (error) {
+                const row = tbody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 3;
+                cell.textContent = 'Error loading active sessions';
+                cell.style.textAlign = 'center';
+                cell.style.color = '#f5576c';
+            }
+        }
+        
+        async function refreshData() {
+            const days = parseInt(document.getElementById('timeRange').value);
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('error');
+            const dashboardElement = document.getElementById('dashboard');
+            
+            loadingElement.style.display = 'block';
+            errorElement.style.display = 'none';
+            dashboardElement.style.display = 'none';
+            
+            try {
+                const data = await fetchAnalytics(days);
+                
+                updateStats(data);
+                updateSessionsChart(data);
+                updateFeaturesChart(data);
+                updateEndpointsTable(data);
+                await updateActiveSessionsTable();
+                
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                
+                loadingElement.style.display = 'none';
+                dashboardElement.style.display = 'block';
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+                loadingElement.style.display = 'none';
+                errorElement.style.display = 'block';
+            }
+        }
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshData();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(refreshData, 30000);
+            
+            // Time range change handler
+            document.getElementById('timeRange').addEventListener('change', refreshData);
+        });
+    </script>
+</body>
+</html>
