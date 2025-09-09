@@ -23,7 +23,7 @@ function App() {
       if (token) {
         try {
           // Validate token with backend
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }

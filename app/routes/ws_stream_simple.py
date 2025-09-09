@@ -35,7 +35,7 @@ async def websocket_test_page():
         <button onclick="sendMessage()">Send</button>
         
         <script>
-            const ws = new WebSocket('ws://localhost:8000/api/v1/ws/test_session');
+            const ws = new WebSocket('ws://localhost:3000/api/v1/ws/test_session');
             
             ws.onmessage = function(event) {
                 const messages = document.getElementById('messages');

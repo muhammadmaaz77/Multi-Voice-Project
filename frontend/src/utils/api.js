@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 // Create axios instance with default config
 export const api = axios.create({
@@ -44,7 +44,7 @@ export const endpoints = {
   health: () => api.get('/health'),
   
   // Authentication
-  login: (username, apiKey) => api.post('/auth/login', { username, api_key: apiKey }),
+  login: (username, apiKey) => api.post('/api/auth/login', { username, api_key: apiKey }),
   
   // Chat endpoints
   chat: (message) => api.post('/chat', { message }),

@@ -13,7 +13,7 @@ export class VoiceWebSocket {
   }
 
   connect() {
-    const wsUrl = `${import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8000'}/api/v1/ws/${this.sessionId}`;
+    const wsUrl = `${import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:3000'}/api/v1/ws/${this.sessionId}`;
     const apiKey = localStorage.getItem('voice_ai_api_key');
     
     try {

@@ -66,14 +66,3 @@ Thumbs.db
 coverage/
 pytest_cache/
 **/__pycache__/
-
-# --- Tests & Dev-only scripts ---
-# Ignore all test files and folders
-/tests/
-**/tests/
-**/test_*.py
-# Dev-only helper scripts
-check_server.py
-verify_server.py
-simple_test.py
-cli_interface.py

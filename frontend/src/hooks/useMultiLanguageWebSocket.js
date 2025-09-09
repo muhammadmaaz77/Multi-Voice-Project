@@ -13,7 +13,7 @@ const useMultiLanguageWebSocket = (roomId, userId, userLanguage) => {
     if (!roomId || !userId || !userLanguage) return;
 
     try {
-      const wsUrl = `ws://localhost:8001/api/v2/ws/multi-language/${roomId}`;
+      const wsUrl = `ws://localhost:3000/api/v2/ws/multi-language/${roomId}`;
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {

@@ -5,8 +5,10 @@ FastAPI application with multiparty conversations, persistent memory, and contai
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from app.routes import base, chat, transcribe, ws_stream_simple as ws_stream, voice_profiles, analytics, dashboard, phase5b, multi_lang_simple
 from app.db import create_tables
+import os
 
 # Initialize FastAPI application
 app = FastAPI(
@@ -18,7 +20,7 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001", "http://localhost:3002", "http://127.0.0.1:3002"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,6 +33,27 @@ async def startup_event():
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Add favicon route
+@app.get("/favicon.ico")
+async def favicon():
+    favicon_path = os.path.join("static", "favicon.svg")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path)
+    return {"message": "Favicon not found"}
+
+# Mount frontend build files
+try:
+    app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="frontend")
+except RuntimeError:
+    # Frontend not built yet - that's ok, we'll build it
+    pass
+
+# Serve frontend build files
+from pathlib import Path
+frontend_dist = Path("frontend/dist")
+if frontend_dist.exists():
+    app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="frontend")
 
 # Include routers
 app.include_router(base.router, tags=["Base"])
@@ -51,4 +74,4 @@ app.include_router(multi_lang_simple.router, prefix="/api/v2", tags=["Multi-Lang
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=3000)
